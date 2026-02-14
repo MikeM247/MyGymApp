@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Gym App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+  <div class="bg-grid"></div>
+
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Workout Ready</p>
+      <h1>My Gym App</h1>
+      <p class="subtitle">Build your session, track your sets, and stay locked in.</p>
+      <div class="hero-actions">
+      </div>
+    </header>
+
+    <section class="panel plan-panel stagger">
+      <h2>Today&apos;s Workout</h2>
+      <div class="form-row">
+        <label for="templateSelect">Template</label>
+        <select id="templateSelect"></select>
+      </div>
+      <div class="form-row">
+        <label for="templateNameInput">Create Template from Current Workout</label>
+        <div class="inline-control">
+          <input id="templateNameInput" type="text" placeholder="e.g. Upper Power Day" />
+          <button id="saveTemplateBtn" class="btn btn-secondary">Save Template</button>
+          <button id="editTemplateBtn" class="btn btn-ghost">Edit Template</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="exerciseInput">Custom exercise</label>
+        <div class="inline-control">
+          <input id="exerciseInput" type="text" placeholder="e.g. Incline Dumbbell Press" />
+          <button id="addExerciseBtn" class="btn btn-secondary">Add</button>
+        </div>
+      </div>
+      <ul id="exerciseList" class="exercise-list"></ul>
+      <div class="session-summary">
+        <div>
+          <span class="stat-label">Completed</span>
+          <strong id="completedCount">0</strong>
+        </div>
+        <div>
+          <span class="stat-label">Total</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div>
+          <span class="stat-label">Progress</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+      </div>
+      <div class="progress-bar"><span id="progressFill"></span></div>
+    </section>
+
+    <section class="panel tools-panel stagger">
+      <h2>Session Tools</h2>
+      <div class="tool-block">
+        <h3>Quick Notes</h3>
+        <textarea id="notesInput" rows="5" placeholder="How did today feel? weights, reps, energy..."></textarea>
+      </div>
+
+      <div class="session-save-actions">
+        <button id="saveSessionBtn" class="btn btn-primary btn-full">Save Session to History</button>
+        <button id="saveCloseSessionBtn" class="btn btn-secondary btn-full">Save and Close Session</button>
+      </div>
+    </section>
+
+    <section class="panel history-panel stagger">
+      <div class="panel-header-row">
+        <h2>Recent Sessions</h2>
+        <button id="clearHistoryBtn" class="btn btn-ghost">Clear History</button>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="stat-label">Current Streak</span>
+          <strong id="streakCount">0 days</strong>
+        </div>
+        <div class="metric-card">
+          <span class="stat-label">All-Time Best Streak</span>
+          <strong id="bestStreakCount">0 days</strong>
+        </div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Volume (Last 10 Sessions)</h3>
+          <canvas id="volumeChart" width="520" height="220"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Consistency (Last 14 Days)</h3>
+          <canvas id="consistencyChart" width="520" height="220"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Personal Records (Estimated 1RM)</h3>
+        <ul id="prList" class="pr-list"></ul>
+      </div>
+      <ul id="historyList" class="history-list"></ul>
+    </section>
+  </main>
+
+  <div id="confirmOverlay" class="confirm-overlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <p id="confirmTitle" class="confirm-title">Confirm Action</p>
+      <p id="confirmMessage" class="confirm-message">Proceed with this action?</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="btn btn-ghost" data-confirm-skip="true">Cancel</button>
+        <button id="confirmOkBtn" class="btn btn-primary" data-confirm-skip="true">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="infoOverlay" class="confirm-overlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <p id="infoTitle" class="confirm-title">Exercise Added</p>
+      <p id="infoMessage" class="confirm-message">Your custom exercise was added to the bottom of the list.</p>
+      <div class="confirm-actions">
+        <button id="infoOkBtn" class="btn btn-primary" data-confirm-skip="true">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
