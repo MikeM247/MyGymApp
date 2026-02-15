@@ -684,18 +684,28 @@ function inferMuscleGroups(exerciseName) {
   return groups.slice(0, 4);
 }
 
+function inferExercisePosition(exerciseName) {
+  const name = exerciseName.toLowerCase();
+  if (/(seated|sit)/.test(name)) return "Seated";
+  if (/(bench|lying|supine|push-up|press)/.test(name)) return "Lying";
+  if (/(plank|prone)/.test(name)) return "Prone";
+  if (/(kneeling|lunge|split squat)/.test(name)) return "Kneeling";
+  return "Standing";
+}
+
 function createMuscleVisual(exerciseName, groups) {
   const wrapper = document.createElement("div");
   wrapper.className = "muscle-visual";
+  const position = inferExercisePosition(exerciseName);
 
   const image = document.createElement("img");
   image.className = "muscle-image";
-  image.alt = `${exerciseName} muscle groups: ${groups.join(", ")}`;
-  image.src = buildMuscleSvgDataUri(groups);
+  image.alt = `${exerciseName} position: ${position}. muscle groups: ${groups.join(", ")}`;
+  image.src = buildMuscleSvgDataUri(groups, position);
 
   const caption = document.createElement("div");
   caption.className = "muscle-caption";
-  caption.textContent = groups.join(" | ");
+  caption.textContent = `${position} | ${groups.join(" | ")}`;
 
   wrapper.appendChild(image);
   wrapper.appendChild(caption);
@@ -762,18 +772,24 @@ function createMuscleEditor(exercise, exerciseLocked = false) {
   return details;
 }
 
-function buildMuscleSvgDataUri(groups) {
+function buildMuscleSvgDataUri(groups, position) {
   const highlights = groups.map((group) => muscleShape(group)).join("");
   const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 120">
-  <rect width="280" height="120" rx="12" fill="#f8fafc"/>
-  <g fill="#e2e8f0" stroke="#94a3b8" stroke-width="2">
-    <circle cx="70" cy="22" r="10"/><rect x="56" y="34" width="28" height="50" rx="12"/>
-    <rect x="46" y="38" width="10" height="38" rx="5"/><rect x="84" y="38" width="10" height="38" rx="5"/>
-    <rect x="60" y="84" width="9" height="26" rx="4"/><rect x="71" y="84" width="9" height="26" rx="4"/>
-    <circle cx="210" cy="22" r="10"/><rect x="196" y="34" width="28" height="50" rx="12"/>
-    <rect x="186" y="38" width="10" height="38" rx="5"/><rect x="224" y="38" width="10" height="38" rx="5"/>
-    <rect x="200" y="84" width="9" height="26" rx="4"/><rect x="211" y="84" width="9" height="26" rx="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 158">
+  <rect width="320" height="158" rx="14" fill="#f8fafc"/>
+  <rect x="10" y="10" width="132" height="138" rx="10" fill="#f1f5f9"/>
+  <rect x="178" y="10" width="132" height="138" rx="10" fill="#f1f5f9"/>
+  <rect x="232" y="16" width="78" height="24" rx="12" fill="#ecfeff" stroke="#67e8f9" stroke-width="1.5"/>
+  <text x="271" y="32" font-size="11" text-anchor="middle" fill="#0f766e" font-family="Space Grotesk, sans-serif">${position}</text>
+  <text x="76" y="144" font-size="11" text-anchor="middle" fill="#64748b" font-family="Space Grotesk, sans-serif">Front</text>
+  <text x="244" y="144" font-size="11" text-anchor="middle" fill="#64748b" font-family="Space Grotesk, sans-serif">Back</text>
+  <g fill="#dbe4f0" stroke="#8aa0b8" stroke-width="2">
+    <circle cx="76" cy="28" r="11"/><rect x="60" y="42" width="32" height="54" rx="13"/>
+    <rect x="49" y="46" width="10" height="40" rx="5"/><rect x="93" y="46" width="10" height="40" rx="5"/>
+    <rect x="64" y="96" width="10" height="30" rx="4"/><rect x="78" y="96" width="10" height="30" rx="4"/>
+    <circle cx="244" cy="28" r="11"/><rect x="228" y="42" width="32" height="54" rx="13"/>
+    <rect x="217" y="46" width="10" height="40" rx="5"/><rect x="261" y="46" width="10" height="40" rx="5"/>
+    <rect x="232" y="96" width="10" height="30" rx="4"/><rect x="246" y="96" width="10" height="30" rx="4"/>
   </g>
   ${highlights}
 </svg>`;
@@ -781,26 +797,26 @@ function buildMuscleSvgDataUri(groups) {
 }
 
 function muscleShape(group) {
-  const fill = "#ff6a3d";
+  const fill = "#ff5a3a";
   const front = {
-    Chest: `<rect x="59" y="44" width="22" height="12" rx="5" fill="${fill}" opacity="0.82"/>`,
-    Shoulders: `<rect x="51" y="35" width="38" height="10" rx="5" fill="${fill}" opacity="0.82"/>`,
-    Triceps: `<rect x="47" y="44" width="7" height="22" rx="3" fill="${fill}" opacity="0.82"/><rect x="86" y="44" width="7" height="22" rx="3" fill="${fill}" opacity="0.82"/>`,
-    Biceps: `<rect x="47" y="38" width="7" height="16" rx="3" fill="${fill}" opacity="0.82"/><rect x="86" y="38" width="7" height="16" rx="3" fill="${fill}" opacity="0.82"/>`,
-    Legs: `<rect x="58" y="84" width="22" height="17" rx="5" fill="${fill}" opacity="0.82"/>`,
-    Calves: `<rect x="60" y="100" width="8" height="10" rx="4" fill="${fill}" opacity="0.82"/><rect x="72" y="100" width="8" height="10" rx="4" fill="${fill}" opacity="0.82"/>`,
-    Core: `<rect x="62" y="56" width="14" height="22" rx="5" fill="${fill}" opacity="0.82"/>`,
-    "Full Body": `<rect x="56" y="35" width="28" height="76" rx="12" fill="${fill}" opacity="0.5"/>`
+    Chest: `<rect x="63" y="50" width="26" height="14" rx="5" fill="${fill}" opacity="0.86"/>`,
+    Shoulders: `<rect x="54" y="41" width="44" height="11" rx="5" fill="${fill}" opacity="0.86"/>`,
+    Triceps: `<rect x="49" y="52" width="8" height="22" rx="3" fill="${fill}" opacity="0.86"/><rect x="95" y="52" width="8" height="22" rx="3" fill="${fill}" opacity="0.86"/>`,
+    Biceps: `<rect x="49" y="45" width="8" height="16" rx="3" fill="${fill}" opacity="0.86"/><rect x="95" y="45" width="8" height="16" rx="3" fill="${fill}" opacity="0.86"/>`,
+    Legs: `<rect x="63" y="96" width="26" height="18" rx="5" fill="${fill}" opacity="0.86"/>`,
+    Calves: `<rect x="64" y="112" width="10" height="12" rx="4" fill="${fill}" opacity="0.86"/><rect x="78" y="112" width="10" height="12" rx="4" fill="${fill}" opacity="0.86"/>`,
+    Core: `<rect x="67" y="65" width="18" height="24" rx="5" fill="${fill}" opacity="0.86"/>`,
+    "Full Body": `<rect x="60" y="42" width="32" height="84" rx="12" fill="${fill}" opacity="0.5"/>`
   };
   const back = {
-    Back: `<rect x="199" y="42" width="22" height="24" rx="6" fill="${fill}" opacity="0.82"/>`,
-    Shoulders: `<rect x="191" y="35" width="38" height="10" rx="5" fill="${fill}" opacity="0.82"/>`,
-    Triceps: `<rect x="187" y="44" width="7" height="22" rx="3" fill="${fill}" opacity="0.82"/><rect x="226" y="44" width="7" height="22" rx="3" fill="${fill}" opacity="0.82"/>`,
-    Biceps: `<rect x="187" y="38" width="7" height="16" rx="3" fill="${fill}" opacity="0.82"/><rect x="226" y="38" width="7" height="16" rx="3" fill="${fill}" opacity="0.82"/>`,
-    Legs: `<rect x="198" y="84" width="22" height="17" rx="5" fill="${fill}" opacity="0.82"/>`,
-    Calves: `<rect x="200" y="100" width="8" height="10" rx="4" fill="${fill}" opacity="0.82"/><rect x="212" y="100" width="8" height="10" rx="4" fill="${fill}" opacity="0.82"/>`,
-    Core: `<rect x="202" y="56" width="14" height="22" rx="5" fill="${fill}" opacity="0.82"/>`,
-    "Full Body": `<rect x="196" y="35" width="28" height="76" rx="12" fill="${fill}" opacity="0.5"/>`
+    Back: `<rect x="231" y="48" width="26" height="26" rx="6" fill="${fill}" opacity="0.86"/>`,
+    Shoulders: `<rect x="222" y="41" width="44" height="11" rx="5" fill="${fill}" opacity="0.86"/>`,
+    Triceps: `<rect x="217" y="52" width="8" height="22" rx="3" fill="${fill}" opacity="0.86"/><rect x="263" y="52" width="8" height="22" rx="3" fill="${fill}" opacity="0.86"/>`,
+    Biceps: `<rect x="217" y="45" width="8" height="16" rx="3" fill="${fill}" opacity="0.86"/><rect x="263" y="45" width="8" height="16" rx="3" fill="${fill}" opacity="0.86"/>`,
+    Legs: `<rect x="231" y="96" width="26" height="18" rx="5" fill="${fill}" opacity="0.86"/>`,
+    Calves: `<rect x="232" y="112" width="10" height="12" rx="4" fill="${fill}" opacity="0.86"/><rect x="246" y="112" width="10" height="12" rx="4" fill="${fill}" opacity="0.86"/>`,
+    Core: `<rect x="235" y="66" width="18" height="24" rx="5" fill="${fill}" opacity="0.86"/>`,
+    "Full Body": `<rect x="228" y="42" width="32" height="84" rx="12" fill="${fill}" opacity="0.5"/>`
   };
 
   return `${front[group] || ""}${back[group] || ""}`;
