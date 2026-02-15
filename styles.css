@@ -260,6 +260,11 @@ textarea {
   background: #fff;
 }
 
+.exercise-item.started {
+  background: #e8f9ee;
+  border-color: #86efac;
+}
+
 .exercise-item.completed .exercise-name {
   text-decoration: line-through;
   color: #6b7280;
