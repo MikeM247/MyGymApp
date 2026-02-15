@@ -245,6 +245,7 @@ function createExercise(name, setCount = state.lastSetCount || 3) {
   return {
     id: crypto.randomUUID(),
     name,
+    started: false,
     done: false,
     muscleGroups: inferMuscleGroups(name),
     setRows: Array.from({ length: sets }, () => ({ reps: 10, weight: rememberedWeight, done: false }))
@@ -260,6 +261,7 @@ function normalizeExercise(item) {
   return {
     id: item.id || crypto.randomUUID(),
     name: String(item.name || "Exercise"),
+    started: Boolean(item.started) || Boolean(item.done),
     done: Boolean(item.done),
     muscleGroups: normalizeMuscleGroups(item.muscleGroups, String(item.name || "Exercise")),
     setRows: Array.from({ length: sets }, (_, index) => ({
@@ -464,9 +466,10 @@ function renderExercises() {
   el.exerciseList.innerHTML = "";
 
   state.exercises.forEach((exercise) => {
+    const exerciseStarted = Boolean(exercise.started);
     const exerciseLocked = exercise.done;
     const li = document.createElement("li");
-    li.className = `exercise-item ${exercise.done ? "completed" : ""}`;
+    li.className = `exercise-item ${exercise.started ? "started" : ""} ${exercise.done ? "completed" : ""}`;
     li.style.position = "relative";
 
     const main = document.createElement("div");
@@ -481,7 +484,7 @@ function renderExercises() {
 
     const status = document.createElement("span");
     status.className = "exercise-status";
-    status.textContent = exercise.done ? "Completed" : "In progress";
+    status.textContent = exercise.done ? "Completed" : (exerciseStarted ? "In progress" : "Not started");
 
     const setCount = document.createElement("span");
     setCount.className = "set-count-pill";
@@ -500,10 +503,20 @@ function renderExercises() {
     const actions = document.createElement("div");
     actions.className = "exercise-actions";
 
+    const startBtn = document.createElement("button");
+    startBtn.className = exerciseStarted ? "btn btn-ghost" : "btn btn-primary";
+    startBtn.textContent = exerciseStarted ? "Exercise Started" : "Start Exercise";
+    startBtn.disabled = exerciseStarted || exerciseLocked;
+    startBtn.addEventListener("click", () => {
+      exercise.started = true;
+      saveWorkout();
+      renderExercises();
+    });
+
     const addSetBtn = document.createElement("button");
     addSetBtn.className = "btn btn-secondary";
     addSetBtn.textContent = "Add Set";
-    addSetBtn.disabled = exerciseLocked;
+    addSetBtn.disabled = !exerciseStarted || exerciseLocked;
     addSetBtn.addEventListener("click", () => {
       addSetRow(exercise);
       saveWorkout();
@@ -513,7 +526,7 @@ function renderExercises() {
     const removeSetBtn = document.createElement("button");
     removeSetBtn.className = "btn btn-ghost";
     removeSetBtn.textContent = "Remove Last Set";
-    removeSetBtn.disabled = exerciseLocked || exercise.setRows.length <= 1;
+    removeSetBtn.disabled = !exerciseStarted || exerciseLocked || exercise.setRows.length <= 1;
     removeSetBtn.addEventListener("click", () => {
       removeSetRow(exercise);
       saveWorkout();
@@ -524,13 +537,19 @@ function renderExercises() {
     completeBtn.className = exercise.done ? "btn btn-ghost" : "btn btn-primary";
     completeBtn.textContent = exercise.done ? "Undo Complete" : "Complete Exercise";
     const allSetsDone = exercise.setRows.every((row) => row.done);
-    if (!exercise.done && !allSetsDone) {
+    if (!exercise.done && !exerciseStarted) {
+      completeBtn.disabled = true;
+      completeBtn.title = "Start this exercise first.";
+    } else if (!exercise.done && !allSetsDone) {
       completeBtn.disabled = true;
       completeBtn.title = "Mark all sets as Set Done first.";
     }
     completeBtn.addEventListener("click", () => {
       const nextDone = !exercise.done;
       exercise.done = nextDone;
+      if (nextDone) {
+        exercise.started = true;
+      }
       saveWorkout();
       if (nextDone) {
         startInlineRest(exercise.id, true);
@@ -544,7 +563,7 @@ function renderExercises() {
     const removeBtn = document.createElement("button");
     removeBtn.className = "btn btn-ghost";
     removeBtn.textContent = "Remove";
-    removeBtn.disabled = exerciseLocked;
+    removeBtn.disabled = !exerciseStarted || exerciseLocked;
     removeBtn.addEventListener("click", () => {
       if (state.inlineRest?.exerciseId === exercise.id) {
         clearInlineRest();
@@ -554,6 +573,7 @@ function renderExercises() {
       renderExercises();
     });
 
+    actions.appendChild(startBtn);
     actions.appendChild(addSetBtn);
     actions.appendChild(removeSetBtn);
     actions.appendChild(completeBtn);
@@ -561,8 +581,8 @@ function renderExercises() {
     top.appendChild(titleWrap);
     main.appendChild(top);
     main.appendChild(muscleVisual);
-    main.appendChild(createMuscleEditor(exercise, exerciseLocked));
-    main.appendChild(createSetRowsEditor(exercise, exerciseLocked));
+    main.appendChild(createMuscleEditor(exercise, exerciseLocked, exerciseStarted));
+    main.appendChild(createSetRowsEditor(exercise, exerciseLocked, exerciseStarted));
     if (state.inlineRest?.exerciseId === exercise.id) {
       const restSlot = document.createElement("div");
       restSlot.className = "exercise-rest-slot";
@@ -595,7 +615,7 @@ function removeSetRow(exercise) {
   saveLastSetCount();
 }
 
-function createSetRowsEditor(exercise, exerciseLocked = false) {
+function createSetRowsEditor(exercise, exerciseLocked = false, exerciseStarted = false) {
   const wrapper = document.createElement("div");
   wrapper.className = "set-rows-block";
 
@@ -641,7 +661,7 @@ function createSetRowsEditor(exercise, exerciseLocked = false) {
     const doneBtn = document.createElement("button");
     doneBtn.className = row.done ? "btn btn-ghost set-done-btn" : "btn btn-secondary set-done-btn";
     doneBtn.textContent = row.done ? "Done" : "Set Done";
-    doneBtn.disabled = exerciseLocked;
+    doneBtn.disabled = exerciseLocked || !exerciseStarted;
     doneBtn.addEventListener("click", () => {
       const weight = sanitizeNumber(exercise.setRows[index].weight, 0, 0, 2000);
       if (!exercise.setRows[index].done && weight <= 0) {
@@ -712,7 +732,7 @@ function createMuscleVisual(exerciseName, groups) {
   return wrapper;
 }
 
-function createMuscleEditor(exercise, exerciseLocked = false) {
+function createMuscleEditor(exercise, exerciseLocked = false, exerciseStarted = false) {
   const details = document.createElement("details");
   details.className = "muscle-editor";
   if (exerciseLocked) {
@@ -736,7 +756,7 @@ function createMuscleEditor(exercise, exerciseLocked = false) {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = exercise.muscleGroups.includes(group);
-    checkbox.disabled = exerciseLocked;
+    checkbox.disabled = exerciseLocked || !exerciseStarted;
     checkbox.addEventListener("change", () => {
       let next = exercise.muscleGroups.filter((x) => x !== group);
       if (checkbox.checked) {
@@ -759,7 +779,7 @@ function createMuscleEditor(exercise, exerciseLocked = false) {
   const autoBtn = document.createElement("button");
   autoBtn.className = "btn btn-ghost";
   autoBtn.textContent = "Auto Detect";
-  autoBtn.disabled = exerciseLocked;
+  autoBtn.disabled = exerciseLocked || !exerciseStarted;
   autoBtn.addEventListener("click", () => {
     exercise.muscleGroups = inferMuscleGroups(exercise.name);
     saveWorkout();
