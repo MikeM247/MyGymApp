@@ -191,7 +191,7 @@ function saveExerciseWeightMap(weightMap) {
 
 function getRememberedWeight(exerciseName) {
   const map = getExerciseWeightMap();
-  return sanitizeNumber(map[exerciseName], 0, 0, 2000);
+  return sanitizeNumber(map[exerciseName], 1, 0, 2000);
 }
 
 function updateRememberedWeight(exerciseName, weight) {
